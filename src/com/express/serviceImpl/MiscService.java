@@ -1,6 +1,7 @@
 package com.express.serviceImpl;
 
 import com.express.daoImpl.*;
+import com.express.info.CustomerAddressEntity;
 import com.express.model.*;
 import com.express.serviceInterface.IMiscService;
 
@@ -71,6 +72,11 @@ public class MiscService implements IMiscService {
     /////////////////////////////位置信息的接口////////////////////////////
 
 
+    @Override
+    public List<ExpressPositionEntity> getExpressPostionInfo(String expressid) {
+        return null;
+    }
+
     /////////////////////////////Address的接口/////////////////////////////
 
     //获得用户所有的收货地址
@@ -85,7 +91,7 @@ public class MiscService implements IMiscService {
             CustomerAddressEntity customerAddressEntity = new CustomerAddressEntity();
 
             RegionEntity region = regionDao.get(addressEntity.getRegionId());
-            CityEntity city = cityDao.get(region.getCityId());
+            CityEntity city = cityDao.get(region.getCityid());
             ProvinceEntity province = provinceDao.get(city.getPid());
 
             customerAddressEntity.setAid(i);
@@ -122,7 +128,7 @@ public class MiscService implements IMiscService {
             CustomerAddressEntity customerAddressEntity = new CustomerAddressEntity();
 
             RegionEntity region = regionDao.get(addressEntity.getRegionId());
-            CityEntity city = cityDao.get(region.getCityId());
+            CityEntity city = cityDao.get(region.getCityid());
             ProvinceEntity province = provinceDao.get(city.getPid());
 
             customerAddressEntity.setAid(i);
@@ -153,10 +159,10 @@ public class MiscService implements IMiscService {
             CustomerAddressEntity customerAddressEntity = new CustomerAddressEntity();
 
             RegionEntity region = regionDao.get(addressEntity.getRegionId());
-            CityEntity city = cityDao.get(region.getCityId());
+            CityEntity city = cityDao.get(region.getCityid());
             ProvinceEntity province = provinceDao.get(city.getPid());
 
-            customerAddressEntity.setAid(i);
+            customerAddressEntity.setAid(addressEntity.getId());
             customerAddressEntity.setCustomerid(cid);
             customerAddressEntity.setName(addressEntity.getName());
             customerAddressEntity.setTelephone(addressEntity.getTelephone());
@@ -189,10 +195,10 @@ public class MiscService implements IMiscService {
             CustomerAddressEntity customerAddressEntity = new CustomerAddressEntity();
 
             RegionEntity region = regionDao.get(addressEntity.getRegionId());
-            CityEntity city = cityDao.get(region.getCityId());
+            CityEntity city = cityDao.get(region.getCityid());
             ProvinceEntity province = provinceDao.get(city.getPid());
 
-            customerAddressEntity.setAid(i);
+            customerAddressEntity.setAid(addressEntity.getId());
             customerAddressEntity.setCustomerid(cid);
             customerAddressEntity.setName(addressEntity.getName());
             customerAddressEntity.setTelephone(addressEntity.getTelephone());
@@ -218,14 +224,41 @@ public class MiscService implements IMiscService {
         }
     }
 
-    //修改收货地址或发货地址的信息
+    //修改收货地址或发货地址的信息    0代表默认地址，1代表普通地址
     @Override
     public String updateAddress(AddressEntity obj) {
+        List<AddressEntity> list = new ArrayList<>();
+        AddressEntity addressEntity = new AddressEntity();
+
         try {
             addressDao.save(obj);
+
+            if (obj.getRank() == 0){
+                list = addressDao.findByCusIdAndRank(obj.getCustomerId(), 0);
+                for (int i = 0; i < list.size(); i++){
+                    addressEntity = list.get(i);
+                    if (obj.getId() != addressEntity.getId()){
+                        addressEntity.setRank(1);
+                        addressDao.save(addressEntity);
+                    }
+                }
+            }
+
             return "{\"updateAddstate\":\"true\"}";
         } catch (Exception e) {
             return "{\"updateAddstate\":\"false\"}";
+        }
+    }
+
+    //删除收货地址、发货地址
+    @Override
+    public String deleteAddress(int aid) {
+        try {
+            addressDao.removeById(aid);
+            return "{\"deleteAddress\":\"true\"}";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "{\"deleteAddress\":\"false\"}";
         }
     }
 

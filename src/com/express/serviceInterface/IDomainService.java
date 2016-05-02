@@ -1,5 +1,7 @@
 package com.express.serviceInterface;
 
+import com.express.info.ExpressInfo;
+import com.express.info.PackageInfo;
 import com.express.model.*;
 
 import javax.ws.rs.*;
@@ -16,6 +18,40 @@ public interface IDomainService {
 
     /////////////////////////////公共的接口（用户和工作人员都要用的）////////////////////////////
 
+    /**
+     *  向包裹中存入包裹
+     * @param packageIds 包裹id list
+     * @return
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
+    @Path("/PackageLoadIntoPackage")
+    public Integer PackageLoadIntoPackage(List<String> packageIds);
+
+    /**
+     *  向包裹中存入快递
+     * @param expressIds 快递id list
+     * @return
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
+    @Path("/PackageLoadIntoPackage")
+    public Integer ExpressLoadIntoPackage(List<String> expressIds);
+
+
+    /**
+     *  按照packageId进行查询
+     * @param packageId 包裹id
+     * @return 返回包裹信息
+     */
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
+    @Path("/getPackageInfoById/{packageId}")
+    public PackageInfo getPackageInfo(@PathParam("packageId") String packageId);
+
 
     /**
      *  通过发送地址和收货地址id获取快递id 寄件
@@ -26,19 +62,21 @@ public interface IDomainService {
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
-    @Path("/createPackage/sendAddressId/{sendAddressId}/recAddressId/{recAddressId}")
-    public String PrepareSendExpress(@PathParam("sendAddressId") Integer sendAddressId, @PathParam("recAddressId") Integer recAddressId);
+    @Path("/prepareSendExpress/customerId/{customerId}/sendAddressId/{sendAddressId}/recAddressId/{recAddressId}")
+    public String PrepareSendExpress(@PathParam("customerId") Integer customerId, @PathParam("sendAddressId") Integer sendAddressId, @PathParam("recAddressId") Integer recAddressId);
 
     /**
-     * 创建一个包裹
-     *
-     * @return 一个包裹实体
+     *  创建一个包裹
+     * @param fromID 出发站点id
+     * @param toID   到达站点id
+     * @param employeesID 员工id
+     * @return
      */
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
-    @Path("/createPackage/{id}")
-    public PackageEntity CreateAPackage(@PathParam("id") Integer id);
+    @Path("/createPackage/fromId/{fromID}/toID/{toID}/employeesID/{employeesID}")
+    public PackageInfo CreateAPackage(@PathParam("fromID") Integer fromID, @PathParam("toID") Integer toID, @PathParam("employeesID") Integer employeesID);
 
     /**
      * 快递装入包裹的操作
@@ -87,10 +125,19 @@ public interface IDomainService {
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
-    @Path("/getExpressInfoById/{tel}")
+    @Path("/getExpressInfoByTel/{tel}")
     public List<ExpressInfo> getExpressInfoByTel(@PathParam("tel") String tel);
 
-
+    /**
+     *  按照用户的id查询快递信息
+     * @param CustomerId
+     * @return
+     */
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
+    @Path("/getExpressInfoByCustomerId/{CustomerId}")
+    public List<ExpressInfo> getExpressInfoByCustomerId(@PathParam("CustomerId") Integer CustomerId);
 
     /**
      * 通过包裹id查找包裹
@@ -139,8 +186,7 @@ public interface IDomainService {
     @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 
     @Path("/getWork/employeeId/{employeeId}/starttime/{starttime}/days/{days}")
-    public List<ExpressEntity> getWork(@PathParam("employeeId") Integer employeeId,@PathParam("starttime") Date starttime,@PathParam("days") Integer days);
-
+    public List<ExpressEntity> getWork(@PathParam("employeeId") Integer employeeId,@PathParam("starttime") String starttime,@PathParam("days") Integer days);
 
     /////////////////////////////用户的接口////////////////////////////
 
@@ -217,6 +263,26 @@ public interface IDomainService {
     @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
     @Path("/doLogOut/{cid}")
     public void doLogOut(@PathParam("cid") int cid);
+
+    /**
+     * 修改手机号
+     * @param telold 手机号
+     * @return 模仿json数据
+     */
+    @GET
+    @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
+    @Path("/changeTel/old/{telold}/new/{telnew}")
+    public String changeTel(@PathParam("telold") String telold, @PathParam("telnew") String telnew);
+
+    /**
+     * 修改密码
+     * @param pwdold 密码
+     * @return 模仿json数据
+     */
+    @GET
+    @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
+    @Path("/changePwd/tel/{tel}/{pwdold}/{pwdnew}")
+    public String changePwd(@PathParam("tel") String tel, @PathParam("pwdold") String pwdold, @PathParam("pwdnew") String pwdnew);
 
 
     /**
@@ -311,7 +377,7 @@ public interface IDomainService {
     @GET
     @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
     @Path("/getPackageById/{id}")
-    public ExpressEntity getPackageById(@PathParam("id") int pid);
+    public ExpressEntity getPackageById(@PathParam("id") String pid);
 
     /////////////////////////////快递员的接口////////////////////////////
 
